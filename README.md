@@ -46,12 +46,14 @@ To install Python and dependencies:
 
 ## Set Connection Strings
 Set the following environment variables:
+    ```
     AZURE_OPENAI_API_KEY=<your-api-key>
     AZURE_OPENAI_ENDPOINT=<your-endpoint-url>
     AZURE_OPENAI_DEPLOYMENT_NAME=gpt-4o-mini
     AZURE_OPENAI_API_VERSION=2025-01-01-preview
     STORAGE_CONNECTION_STRING=<your-storage-connection-string>
     STORAGE_CONTAINER_NAME=<your-container-name>
+    ```
 
 ## Run main.py
 
