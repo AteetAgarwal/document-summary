@@ -1,0 +1,9 @@
+openai>=1.0.0
+pandas>=2.0.0
+PyMuPDF>=1.20.0  # for PDF processing
+pdf2image>=1.16.0  # for converting PDF pages to images
+pytesseract>=0.3.10  # for OCR
+python-dotenv>=1.0.0  # for environment variables
+Pillow>=10.0.0  # required by pdf2image
+requests
+azure.storage.blob==12.25.1
