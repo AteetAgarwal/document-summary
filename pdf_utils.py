@@ -16,6 +16,7 @@ def extract_text_from_pdf(pdf_path: str) -> str:
     for page_number in range(len(doc)):
         page = doc[page_number]
         page_text = page.get_text()
+        images = page.get_images(full=True)
         
         if page_text.strip():
             text.append(page_text.strip())
@@ -23,12 +24,11 @@ def extract_text_from_pdf(pdf_path: str) -> str:
             print(f"No text found on page {page_number + 1}, performing OCR on images.")
 
         # If no text found, perform OCR on the entire page
-        if not page_text.strip():
+        if not page_text.strip() and images:
             print(f"Performing OCR on page {page_number + 1}...")
             # Ensure the page is rendered as an image
             # This is necessary for OCR to work on the visual content of the page
             # Render the page as an image
-            # Note: This can be memory-intensive for large PDFs, consider processing in chunks if needed
             pix = page.get_pixmap(dpi=300)
             img_bytes = pix.tobytes("png")
             img = Image.open(BytesIO(img_bytes))
