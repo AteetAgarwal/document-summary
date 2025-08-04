@@ -5,41 +5,44 @@ from typing import List, Dict, Any
 import os
 from PIL import Image
 from io import BytesIO
-
 import requests
 
-# Set the tesseract_cmd to the full path of the tesseract executable
-#pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'  # Windows example
-# For Linux/Mac, use the path where tesseract is installed, e.g. 'C:\Program Files\Tesseract-OCR\tesseract.exe /usr/bin/tesseract'
 
 def extract_text_from_pdf(pdf_path: str) -> str:
     """Extract text from PDF and perform OCR only on embedded images."""
     doc = fitz.open(pdf_path)
     text = []
     
-    for page in doc:
-        # Extract text directly from PDF
-        text.append(page.get_text())
+    for page_number in range(len(doc)):
+        page = doc[page_number]
+        page_text = page.get_text()
         
-        # Process only actual images in the PDF
-        for img in enumerate(page.get_images(full=True)):
-            try:
-                # Extract image data
-                xref = img[1][0]
-                base_image = doc.extract_image(xref)
-                
-                if base_image:
-                    image_bytes = base_image["image"]
-                    image = Image.open(BytesIO(image_bytes))
-                    img_text = pytesseract.image_to_string(image, config='--psm 6')
-                    print(f"OCR text from image on page {page.number}: {img_text}")
-                    if img_text.strip():  # Only add if text was found
-                        text.append(img_text)
-                        
-            except Exception as e:
-                print(f"Error processing image on page {page.number}: {str(e)}")
+        if page_text.strip():
+            text.append(page_text.strip())
+        else:
+            print(f"No text found on page {page_number + 1}, performing OCR on images.")
+
+        # If no text found, perform OCR on the entire page
+        if not page_text.strip():
+            print(f"Performing OCR on page {page_number + 1}...")
+            # Ensure the page is rendered as an image
+            # This is necessary for OCR to work on the visual content of the page
+            # Render the page as an image
+            # Note: This can be memory-intensive for large PDFs, consider processing in chunks if needed
+            pix = page.get_pixmap(dpi=300)
+            img_bytes = pix.tobytes("png")
+            img = Image.open(BytesIO(img_bytes))
+
+            # Optional: convert to grayscale
+            img = img.convert("L")
+
+            # OCR using Tesseract
+            img_text = pytesseract.image_to_string(img, config='--psm 3')
+            print(f"--- OCR text from page {page_number} ---")
+            text.append(img_text.strip())
+    doc.close()
     
-    return "\n".join(text)
+    return " ".join(text)
 
 def create_chunks(text: str, max_words: int = 6000) -> List[str]:
     """Split text into chunks of specified maximum word count."""
